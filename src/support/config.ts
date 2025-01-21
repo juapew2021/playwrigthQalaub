@@ -8,7 +8,6 @@ const browserOptions: LaunchOptions = {
     'media.navigator.permission.disabled': true,
   },
   headless: false,
-
 };
 
 export const config = {
