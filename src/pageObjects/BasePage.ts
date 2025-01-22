@@ -15,6 +15,8 @@ class BasePage {
         return await this.page.getByText(element.selector).first().click();
       case 'placeholder':
         return await this.page.getByPlaceholder(element.selector).first().click();
+      case 'button':
+        return await this.page.getByRole('button', { name: element.selector }).first().click();
       default:
         return await this.page.click(this.elements[name]);
     }
@@ -28,7 +30,7 @@ class BasePage {
       case 'placeholder':
         return await this.page.getByPlaceholder(element.selector).first().type(text);
       default:
-        return await this.page.type(this.elements[name], text);
+        return await this.page.locator(element.selector).first().type(text);
     }
   }
 

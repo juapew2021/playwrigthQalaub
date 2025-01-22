@@ -1,4 +1,0 @@
-{
-  "btnAccount": "//span[text() = 'My Account']",
-  "btnRegister": "//a[text() = 'Register']"
-}

@@ -1,13 +1,17 @@
-import { When } from '@cucumber/cucumber';
+import { Then } from '@cucumber/cucumber';
 import LoginActions from '../../pageObjects/login/pageActions/LoginActions';
+import { expect } from '@playwright/test';
 
-When('ingresa las credenciales de login', async function () {
+Then('Ingresa las credenciales de login', async function () {
   const page = this.page!;
-  const newWindow = await page.context().waitForEvent('page');
-
-  let loginActions = new LoginActions(newWindow);
-  await loginActions.type('inputEmail', 'info@qalaub.com');
-  await loginActions.type('inputPassword', 'QAlaub2024+');
+  let loginActions = new LoginActions(page);
+  await loginActions.type('inputEmail', 'usuario2201');
+  await loginActions.type('inputPassword', 'Usuario2201@');
   await loginActions.click('btnLogin');
-  await page.waitForTimeout(10000);
+});
+
+Then('Se visuzaliza el nombre de usuario', async function () {
+  const page = this.page!;
+  // let loginActions = new LoginActions(page);
+  await expect(page.getByText('Hi, usuario2201')).toBeVisible();
 });

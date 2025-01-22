@@ -1,9 +1,9 @@
-import { Then, When } from "@cucumber/cucumber";
-import { config } from "../../support/config";
-import MainActions from "../../pageObjects/main/pageActions/MainActions";
+import { Then, When } from '@cucumber/cucumber';
+import { config } from '../../support/config';
+import MainActions from '../../pageObjects/main/pageActions/MainActions';
 // import { test, expect } from '@playwright/test';
 
-When('se ingresa a la pagina principal', async function () {
+When('Ingresa a la pagina principal', async function () {
   const page = this.page!;
   await page.goto(config.BASE_URL);
 });

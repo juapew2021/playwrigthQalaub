@@ -1,9 +1,0 @@
-{
-  "inputFirtsName": "//input[@id = 'input-firstname']",
-  "inputLastName": "//input[@id = 'input-lastname']",
-  "inputEmail": "//input[@id = 'input-email']",
-  "inputPassword": "//input[@id = 'input-password']",
-  "btnAgree": "//input[@name = 'agree']",
-  "btnContinue": "//button[text()= 'Continue']",
-  "successMessage": "//h1"
-}

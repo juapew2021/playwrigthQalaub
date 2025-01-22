@@ -2,9 +2,9 @@ import PageElement from '../../../support/types/PageElement';
 
 class LoginElements {
   public static elements: Record<string, PageElement> = {
-    inputEmail: { selector: 'ejemplo@gmail.com', find: 'placeholder' },
-    inputPassword: { selector: 'Ingresa tu contraseña', find: 'placeholder' },
-    btnLogin: { selector: 'Inicia sesión', find: 'text' },
+    inputEmail: { selector: 'Login', find: 'placeholder' },
+    inputPassword: { selector: 'xpath=//input[@name = "password"]', find: 'locator' },
+    btnLogin: { selector: 'Login', find: 'button' },
   };
 }
 
