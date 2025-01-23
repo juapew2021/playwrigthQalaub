@@ -2,7 +2,6 @@ const getWorldParams = () => {
   const params = {
     foo: 'bar',
   };
-
   return params;
 };
 
@@ -10,8 +9,8 @@ const config = {
   requireModule: ['ts-node/register'],
   require: ['src/**/*.ts'],
   format: [
-    'json:reports/cucumber-report.json',
-    'html:reports/report.html',
+    'junit:reports/cucumber-report.xml', // Reporte XML para Xray
+    'json:reports/cucumber-report.json', // Reporte JSON con tags
     'summary',
     'progress-bar',
   ],
@@ -25,4 +24,5 @@ if (process.env.USE_ALLURE) {
 } else {
   config.format.push('@cucumber/pretty-formatter');
 }
+
 export default config;

@@ -1,21 +1,111 @@
-MIT License
+pipeline {
+environment {
+IMAGE_NAME = 'mcr.microsoft.com/playwright:v1.31.2-jammy'
+JIRA_ISSUE_KEY = "${params.ISSUE_KEY}" // Recibido desde Jira
+}
 
-Copyright (c) 2021 Henri d'Orgeval
+    parameters {
+        string(name: 'testPlanKey', defaultValue: '', description: 'Clave del Test Plan en Jira')
+        string(name: 'projectKey', defaultValue: '', description: 'Clave del Proyecto en Jira')
+    }
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+    agent any
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+    stages {
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+        // Clonar repositorio
+        stage('Clonar repositorio') {
+            steps {
+                script {
+                    sh 'echo $XRAY_TEST'
+                    sh '''
+                        docker run --rm -v $(pwd):/workspace -w /workspace mcr.microsoft.com/playwright:v1.31.2-jammy \
+                        sh -c "rm -rf playwrigthQalaub && git clone https://github.com/harryson723/playwrigthQalaub.git"
+                    '''
+                }
+            }
+        }
+
+        // Configurar entorno
+        stage('Configurar entorno') {
+            steps {
+                script {
+                    sh '''
+                        docker run --rm -v $(pwd):/workspace -w /workspace mcr.microsoft.com/playwright:v1.49.1-jammy \
+                        sh -c "echo 'BASE_URL=https://buggy.justtestit.org/' > playwrigthQalaub/.env && \
+                               echo 'BASE_API_URL=https://k51qryqov3.execute-api.ap-southeast-2.amazonaws.com/prod/' >> playwrigthQalaub/.env && \
+                               echo 'BROWSER=chromium' >> playwrigthQalaub/.env && \
+                               echo 'HEADLESS=true' >> playwrigthQalaub/.env"
+
+                        docker run --rm -v $(pwd):/workspace -w /workspace mcr.microsoft.com/playwright:v1.49.1-jammy \
+                        cat playwrigthQalaub/.env
+                    '''
+                }
+            }
+        }
+
+        // Instalar dependencias
+        stage('Instalar dependencias') {
+            steps {
+                script {
+                    sh '''
+                        docker run --rm -v $(pwd)/playwrigthQalaub:/workspace -w /workspace $IMAGE_NAME \
+                        npm ci
+                        docker run --rm -v $(pwd)/playwrigthQalaub:/workspace -w /workspace $IMAGE_NAME \
+                        pwd
+                    '''
+                }
+            }
+        }
+
+        // Ejecución de pruebas
+        stage('Ejecución de pruebas') {
+            steps {
+                script {
+                    sh '''
+                        docker run --rm -v $(pwd)/playwrigthQalaub:/workspace -w /workspace $IMAGE_NAME \
+                        npm run test
+                    '''
+                }
+            }
+        }
+    }
+
+post {
+always {
+echo 'Publicando resultados en Xray...'
+script {
+// Crear el directorio de destino si no existe
+sh 'ls playwrigthQalaub'
+sh 'mkdir -p playwrigthQalaub/reports'
+
+            // Copiar el archivo del contenedor al entorno local
+            sh '''
+                CONTAINER_ID=$(docker run -d -v $(pwd)/playwrigthQalaub:/workspace -w /workspace $IMAGE_NAME)
+                docker cp $CONTAINER_ID:/workspace/reports/cucumber-report.json $(pwd)/playwrigthQalaub/reports/cucumber-report.json
+                docker rm -f $CONTAINER_ID
+            '''
+
+            // Verificar si el archivo de reporte existe antes de intentar publicarlo
+            def reportPath = '/var/jenkins_home/workspace/framework/playwrigthQalaub/reports/cucumber-report.json'
+            sh 'ls playwrigthQalaub/reports/'
+            if (fileExists(reportPath)) {
+                step([$class: 'XrayImportBuilder',
+                    endpointName: '/cucumber',
+                    importFilePath: reportPath,
+                    importInParallel: 'false',
+                    importToSameExecution: 'false',
+                    projectKey: 'DP',
+                    revision: 'Jenkins',
+                    serverInstance: 'CLOUD-b8651b95-85ea-4b7c-8bfe-cad2b1c36ff0',
+                    testEnvironments: 'QA',
+                    testPlanKey: 'DP-2'])
+            } else {
+                echo "No se encontró el archivo de reporte: ${reportPath}. No se puede publicar en Xray."
+            }
+        }
+    }
+
+}
+
+}
