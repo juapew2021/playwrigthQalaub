@@ -37,27 +37,37 @@ fs.readFile('reports/cucumber-report.json', 'utf8', (err, data) => {
       const scenarioDuration =
         scenario.steps.reduce((sum, step) => sum + (step.result.duration || 0), 0) / 1e9;
 
+      // Verificar si algún paso ha fallado
+      const failedStep = scenario.steps.find((step) => step.result.status === 'failed');
+
+      // Contar escenarios fallidos para sumarlos a los failures del testsuite
+      if (failedStep) {
+        testsuite.testsuite.$.failures++;
+      }
+
       // Filtrar solo tags que contengan IDs de prueba (ej: @DP-123)
       let testProperties = scenario.tags
-        .filter((tag) => /^@DP-\d+/.test(tag.name)) // Filtrar por patrón "@DP-"
+        .filter((tag) => /^@DP-\d+/.test(tag.name))
         .map((tag) => ({
           property: { $: { name: 'test_key', value: tag.name.replace('@', '') } },
         }));
 
-      // Solo agregar el bloque 'properties' si se encuentran tags @DP-xxx
       const testcase = {
         $: {
           classname: feature.name,
           name: scenario.name,
           time: scenarioDuration.toFixed(3),
         },
-        // Solo agregar properties si se encontró un test_key
-        ...(testProperties.length > 0 && {
-          properties: testProperties,
-        }),
+        ...(testProperties.length > 0 && { properties: testProperties }),
         'system-out': {
           _: scenario.steps.map((s) => `${s.keyword} ${s.name}... ${s.result.status}`).join('\n'),
         },
+        ...(failedStep && {
+          failure: {
+            _: `Step failed: ${failedStep.name}`,
+            $: { message: 'Test failed', type: 'AssertionError' },
+          },
+        }),
       };
 
       testsuite.testsuite.testcase.push(testcase);
@@ -72,6 +82,6 @@ fs.readFile('reports/cucumber-report.json', 'utf8', (err, data) => {
       console.error('Error escribiendo el archivo XML:', err);
       return;
     }
-    console.log('Reporte XML con test_key generado correctamente.');
+    console.log('Reporte XML con test_key y fallos generado correctamente.');
   });
 });
