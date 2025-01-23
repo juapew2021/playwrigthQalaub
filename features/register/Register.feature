@@ -1,7 +1,7 @@
 @Register
 Feature: Login
 
-  @SmokeTest @DP-1
+  @SmokeTest
   Scenario: Login
     When Ingresa a la pagina principal
     Then Se dirige a registrar un usuario
