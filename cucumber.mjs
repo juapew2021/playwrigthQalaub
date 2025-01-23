@@ -9,7 +9,7 @@ const getWorldParams = () => {
 const config = {
   requireModule: ['ts-node/register'],
   require: ['src/**/*.ts'],
-  format: ['json:reports/cucumber-report.json', 'summary', 'progress-bar'],
+  format: ['junit:reports/cucumber-report.xml', 'summary', 'progress-bar'],
   formatOptions: { snippetInterface: 'async-await' },
   worldParameters: getWorldParams(),
   publishQuiet: true,
