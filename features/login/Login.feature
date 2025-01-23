@@ -1,5 +1,8 @@
 Feature: Login
 
+Background 
+
+
   Scenario: Login
     When Ingresa a la pagina principal
     Then Ingresa las credenciales de login
