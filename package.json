@@ -18,7 +18,7 @@
     "snippets": "cucumber-js features/**/*.feature --dry-run --format snippets",
     "steps-usage": "cucumber-js features/**/*.feature --dry-run",
     "all": "cucumber-js features/**/*.feature",
-    "test": "cucumber-js",
+    "test": "cucumber-js && cucumber-junit < reports/cucumber-report.json > reports/cucumber-report.xml",
     "test:parallel": "cucumber-js --parallel=2",
     "docker": "docker run --rm --network host -v $(pwd):/work/ -w /work/ -it mcr.microsoft.com/playwright:latest /bin/bash",
     "allure": "allure serve reports/allure-results"
@@ -62,6 +62,7 @@
     "@typescript-eslint/parser": "5.55.0",
     "@xray-app/playwright-junit-reporter": "^0.4.0",
     "allure-cucumberjs": "^2.15.1",
+    "cucumber-junit": "^1.7.1",
     "eslint": "8.36.0",
     "eslint-config-prettier": "8.7.0",
     "eslint-plugin-import": "2.27.5",
