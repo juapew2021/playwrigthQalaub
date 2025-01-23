@@ -44,17 +44,23 @@ fs.readFile('reports/cucumber-report.json', 'utf8', (err, data) => {
           property: { $: { name: 'test_key', value: tag.name.replace('@', '') } },
         }));
 
-      testsuite.testsuite.testcase.push({
+      // Solo agregar el bloque 'properties' si se encuentran tags @DP-xxx
+      const testcase = {
         $: {
           classname: feature.name,
           name: scenario.name,
           time: scenarioDuration.toFixed(3),
         },
-        properties: testProperties.length > 0 ? testProperties : undefined,
+        // Solo agregar properties si se encontró un test_key
+        ...(testProperties.length > 0 && {
+          properties: testProperties,
+        }),
         'system-out': {
           _: scenario.steps.map((s) => `${s.keyword} ${s.name}... ${s.result.status}`).join('\n'),
         },
-      });
+      };
+
+      testsuite.testsuite.testcase.push(testcase);
     });
   });
 
