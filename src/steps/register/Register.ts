@@ -21,6 +21,6 @@ When('Crea un usuario nuevo', async function () {
   await registerActions.type('inputFirstName', firstName);
   await registerActions.type('inputLastName', lastName);
   await registerActions.type('inputPassword', 'Usuario2201@');
-  await registerActions.type('inputConfirmPassword', 'Usuaro2201@');
+  await registerActions.type('inputConfirmPassword', 'Usuario2201@');
   await registerActions.click('btnRegister');
 });
