@@ -9,7 +9,7 @@ const getWorldParams = () => {
 const config = {
   requireModule: ['ts-node/register'],
   require: ['src/**/*.ts'],
-  format: ['junit:reports/cucumber-report.xml', 'summary', 'progress-bar'],
+  format: ['json:reports/cucumber-report.json', 'summary', 'progress-bar'],
   formatOptions: { snippetInterface: 'async-await' },
   worldParameters: getWorldParams(),
   publishQuiet: true,
@@ -20,5 +20,4 @@ if (process.env.USE_ALLURE) {
 } else {
   config.format.push('@cucumber/pretty-formatter');
 }
-
 export default config;
